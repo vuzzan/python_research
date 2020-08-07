@@ -1,0 +1,37 @@
+import ldap
+
+LDAP_SERVER = 'ldap://ent-ldap-sin.ent.core.medtronic.com'
+BASE_DN = 'DC=ent,DC=core,DC=medtronic,DC=com'  # base dn to search in
+LDAP_LOGIN = 'tinhl2@ENT'
+LDAP_PASSWORD = ''
+OBJECT_TO_SEARCH = '(&(objectClass=user)(objectCategory=person)(samaccountname=tinhl2))'
+#OBJECT_TO_SEARCH = 'cn=*tinhl2*'
+#ATTRIBUTES_TO_SEARCH = None
+ATTRIBUTES_TO_SEARCH = ["sAMAccountName", "givenName", "cn", "mail", "telephoneNumber", "mobile"]
+
+print(LDAP_SERVER)
+connect = ldap.initialize(LDAP_SERVER)
+connect.set_option(ldap.OPT_REFERRALS, 0)  # to search the object and all its descendants
+print(LDAP_LOGIN)
+try:
+	ret = connect.simple_bind_s(LDAP_LOGIN, LDAP_PASSWORD)
+	print('Login ')
+	print(ret)
+	print(BASE_DN)
+	print(OBJECT_TO_SEARCH)
+	print(ATTRIBUTES_TO_SEARCH)
+	print('search result: ')
+	ldap_result_id = connect.search_s(	BASE_DN, ldap.SCOPE_SUBTREE, 
+								OBJECT_TO_SEARCH, 
+								ATTRIBUTES_TO_SEARCH)
+	print(ldap_result_id)
+	print('====')
+	for a_tuple in ldap_result_id:  # iterates through each tuple
+		print('')
+		print(a_tuple)
+		for item in a_tuple:  		# iterates through each tuple items
+			print(item)
+except ldap.LDAPError as e:
+	print('Login error')
+	#print(e)
+	print(e.args[0]['desc'])
